@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usciamo insieme? 🌸</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #fdf2f4;
+      --card-bg: #ffffff;
+      --primary: #fb7185;
+      --primary-hover: #f43f5e;
+      --whatsapp: #25d366;
+      --whatsapp-hover: #20bd5a;
+      --calendar: #6366f1;
+      --calendar-hover: #4f46e5;
+      --text: #4b5563;
+      --title: #1f2937;
+      --border-gray: #e5e7eb;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 34px 28px;
+      border-radius: 28px;
+      box-shadow: 0 15px 35px rgba(244, 63, 94, 0.08);
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      position: relative;
+    }
+
+    .step {
+      display: none;
+      animation: fadeIn 0.28s ease;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 22px;
+      object-fit: cover;
+      margin-bottom: 18px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+
+    .emoji-header {
+      font-size: 3.2rem;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      color: var(--title);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    p {
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+      min-height: 55px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    button, .btn-action {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 13px 22px;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    button:hover, .btn-action:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    button:active, .btn-action:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #4b5563;
+      width: auto;
+      min-width: 110px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+
+    .btn-wa {
+      background-color: var(--whatsapp);
+      margin-bottom: 10px;
+    }
+
+    .btn-wa:hover {
+      background-color: var(--whatsapp-hover);
+    }
+
+    .btn-cal {
+      background-color: var(--calendar);
+    }
+
+    .btn-cal:hover {
+      background-color: var(--calendar-hover);
+    }
+
+    #no-btn {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      position: absolute;
+      right: 35px;
+      width: auto;
+      transition: top 0.15s ease, left 0.15s ease;
+    }
+
+    #yes-btn {
+      position: absolute;
+      left: 35px;
+      width: auto;
+    }
+
+    /* Form Styles */
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    input[type="date"], select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-gray);
+      font-size: 0.95rem;
+      color: var(--title);
+      outline: none;
+      background: #fafafa;
+      transition: border-color 0.2s;
+    }
+
+    input[type="date"]:focus, select:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .input-error {
+      border-color: var(--error) !important;
+      background-color: #fef2f2 !important;
+    }
+
+    .error-msg {
+      display: none;
+      color: var(--error);
+      font-size: 0.82rem;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Selection Grids */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .option-card {
+      background: #f9fafb;
+      border: 2px solid #f3f4f6;
+      border-radius: 18px;
+      padding: 14px 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .option-card span:first-child {
+      font-size: 1.8rem;
+    }
+
+    .option-card span:last-child {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--title);
+    }
+
+    .option-card.selected {
+      border-color: var(--primary);
+      background-color: #fff1f2;
+    }
+
+    /* Summary Card */
+    .summary-card {
+      border: 2px dashed #fecdd3;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 20px;
+      background: #fff1f2;
+      text-align: left;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .summary-item strong {
+      color: var(--title);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- Step 1: Proposta -->
+    <div id="step-1" class="step active">
+      <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80" alt="Cagnolino" class="avatar" />
+      <h1>🌸 Ti andrebbe di uscire insieme? 🌸</h1>
+      <p>Scegli con molta attenzione...</p>
+      <div class="btn-container">
+        <button id="yes-btn" onclick="nextStep(2)">SÌ 💖</button>
+        <button id="no-btn" onmouseover="fleeButton()" onclick="fleeButton()">NO 💔</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Reazione -->
+    <div id="step-2" class="step">
+      <div class="emoji-header">🥳</div>
+      <h1>HAI DETTO DAVVERO DI SÌ?!</h1>
+      <p>Ero già pronto a rassegnarmi 😭</p>
+      <div class="actions-row">
+        <button onclick="nextStep(3)">Organizziamo! →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Data e Ora (Obbligatori) -->
+    <div id="step-3" class="step">
+      <div class="emoji-header">📅</div>
+      <h1>Quando sei libera?</h1>
+      <p style="margin-bottom: 14px; font-size: 0.88rem; color: #6b7280;">Seleziona giorno e orario preferito</p>
+      
+      <div class="form-group">
+        <label for="date-input">Scegli il giorno *</label>
+        <input type="date" id="date-input" oninput="clearError('date-error', this)" />
+        <div id="date-error" class="error-msg">⚠️ Per favore, seleziona una data valida per continuare.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="time-input">A che ora? *</label>
+        <select id="time-input" onchange="clearError('time-error', this)">
+          <option value="">-- Seleziona un orario --</option>
+          <option value="19:30">19:30</option>
+          <option value="20:00">20:00</option>
+          <option value="20:30">20:30</option>
+          <option value="21:00">21:00</option>
+          <option value="13:00">13:00 (Pranzo)</option>
+        </select>
+        <div id="time-error" class="error-msg">⚠️ Seleziona un orario per proseguire.</div>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" onclick="nextStep(2)">← Indietro</button>
+        <button onclick="validateStep3()">Avanti 💖</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Scelta Cibo (Obbligatoria) -->
+    <div id="step-4" class="step">
+      <div class="emoji-header">🍽️</div>
+      <h1>Cosa ti andrebbe di mangiare?</h1>
+      <p style="margin-bottom: 14px;">Scegli almeno un'opzione *</p>
+      
+      <div class="option-grid" id="food-grid">
+        <div class="option-card" onclick="selectOption(this, 'food', 'Pizza')"><span>🍕</span><span>Pizza</span></div>
+        <div class="option-card" onclick="selectOption(this, 'food', 'Sushi')"><span>🍣</span><span>Sushi</span></div>
+        <div class="option-card" onclick="selectOption(this, 'food', 'Hamburger')"><span>🍔</span><span>Burger</span></div>
+        <div class="option-card" onclick="selectOption(this, 'food', 'Trattoria')"><span>🍝</span><span>Trattoria</span></div>
+        <div class="option-card" onclick="selectOption(this, 'food', 'Messicano')"><span>🌮</span><span>Messicano</span></div>
+        <div class="option-card" onclick="selectOption(this, 'food', 'Aperitivo')"><span>🍹</span><span>Aperitivo</span></div>
+      </div>
+      <div id="food-error" class="error-msg" style="margin-bottom: 12px;">⚠️ Scegli cosa ti piacerebbe mangiare prima di andare avanti.</div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" onclick="nextStep(3)">← Indietro</button>
+        <button onclick="validateStep4()">Avanti 😋</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Attività Post-Cena (Obbligatoria) -->
+    <div id="step-5" class="step">
+      <div class="emoji-header">✨</div>
+      <h1>Cosa facciamo dopo?</h1>
+      <p style="margin-bottom: 14px;">Il tocco finale della serata *</p>
+      
+      <div class="option-grid" id="activity-grid">
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Passeggiata')"><span>🚶‍♂️</span><span>Passeggiata</span></div>
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Gelato')"><span>🍦</span><span>Gelato</span></div>
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Cocktail')"><span>🍸</span><span>Drink</span></div>
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Cinema')"><span>🎬</span><span>Cinema</span></div>
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Posto panoramico')"><span>🌌</span><span>Vista</span></div>
+        <div class="option-card" onclick="selectOption(this, 'activity', 'Sorpresa')"><span>🎁</span><span>A sorpresa</span></div>
+      </div>
+      <div id="activity-error" class="error-msg" style="margin-bottom: 12px;">⚠️ Seleziona un'attività post-cena.</div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" onclick="nextStep(4)">← Indietro</button>
+        <button onclick="validateStep5()">Vedi il piano 💌</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Recap Finale -->
+    <div id="step-6" class="step">
+      <div class="emoji-header">🎟️</div>
+      <h1>Appuntamento Ufficiale!</h1>
+      <p>Ecco il riepilogo delle tue scelte:</p>
+
+      <div class="summary-card">
+        <div class="summary-item"><span>Data:</span> <strong id="summary-date">-</strong></div>
+        <div class="summary-item"><span>Orario:</span> <strong id="summary-time">-</strong></div>
+        <div class="summary-item"><span>Cena:</span> <strong id="summary-food">-</strong></div>
+        <div class="summary-item"><span>Dopocena:</span> <strong id="summary-activity">-</strong></div>
+        <div class="summary-item" style="margin-bottom:0;"><span>Passo a prenderti:</span> <strong>Sì 🚗</strong></div>
+      </div>
+
+      <a id="wa-link" href="#" target="_blank" class="btn-action btn-wa">
+        💬 Inviami la conferma su WhatsApp
+      </a>
+
+      <button onclick="downloadCalendarFile()" class="btn-action btn-cal">
+        📅 Aggiungi al Calendario (.ics)
+      </button>
+
+      <div class="actions-row" style="margin-top: 14px;">
+        <button class="btn-secondary" style="width: 100%;" onclick="nextStep(5)">← Modifica scelte</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sostituisci con il tuo numero di telefono (prefisso + numero, es. 393401234567)
+    const MY_PHONE_NUMBER = "393662138262"; 
+
+    let selectedFood = null;
+    let selectedActivity = null;
+
+    // Imposta la data minima selezionabile su "oggi"
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().split('T')[0];
+      const dateEl = document.getElementById('date-input');
+      if (dateEl) dateEl.min = today;
+    });
+
+    function nextStep(stepNumber) {
+      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+      const target = document.getElementById('step-' + stepNumber);
+      if (target) target.classList.add('active');
+    }
+
+    function fleeButton() {
+      const btn = document.getElementById('no-btn');
+      const card = document.querySelector('.card');
+      const cardRect = card.getBoundingClientRect();
+
+      const maxX = cardRect.width - btn.offsetWidth - 30;
+      const maxY = cardRect.height - btn.offsetHeight - 30;
+
+      const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+      btn.style.left = `${randomX}px`;
+      btn.style.top = `${randomY}px`;
+      btn.style.right = 'auto';
+    }
+
+    function selectOption(element, type, value) {
+      const parent = element.closest('.option-grid');
+      parent.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+
+      if (type === 'food') {
+        selectedFood = value;
+        document.getElementById('food-error').style.display = 'none';
+      }
+      if (type === 'activity') {
+        selectedActivity = value;
+        document.getElementById('activity-error').style.display = 'none';
+      }
+    }
+
+    function clearError(errorId, inputEl) {
+      document.getElementById(errorId).style.display = 'none';
+      if (inputEl) inputEl.classList.remove('input-error');
+    }
+
+    function validateStep3() {
+      const dateInput = document.getElementById('date-input');
+      const timeInput = document.getElementById('time-input');
+      let isValid = true;
+
+      if (!dateInput.value) {
+        dateInput.classList.add('input-error');
+        document.getElementById('date-error').style.display = 'block';
+        isValid = false;
+      } else {
+        dateInput.classList.remove('input-error');
+        document.getElementById('date-error').style.display = 'none';
+      }
+
+      if (!timeInput.value) {
+        timeInput.classList.add('input-error');
+        document.getElementById('time-error').style.display = 'block';
+        isValid = false;
+      } else {
+        timeInput.classList.remove('input-error');
+        document.getElementById('time-error').style.display = 'none';
+      }
+
+      if (isValid) nextStep(4);
+    }
+
+    function validateStep4() {
+      if (!selectedFood) {
+        document.getElementById('food-error').style.display = 'block';
+        return;
+      }
+      nextStep(5);
+    }
+
+    function validateStep5() {
+      if (!selectedActivity) {
+        document.getElementById('activity-error').style.display = 'block';
+        return;
+      }
+      prepareSummary();
+    }
+
+    function prepareSummary() {
+      const rawDate = document.getElementById('date-input').value;
+      const timeVal = document.getElementById('time-input').value;
+      
+      const d = new Date(rawDate + 'T00:00:00');
+      const displayDate = d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      document.getElementById('summary-date').textContent = displayDate;
+      document.getElementById('summary-time').textContent = timeVal;
+      document.getElementById('summary-food').textContent = selectedFood;
+      document.getElementById('summary-activity').textContent = selectedActivity;
+
+      const message = `Ciao! Ho compilato il modulo per l'uscita 💖\n\n📅 Data: ${displayDate}\n⏰ Ore: ${timeVal}\n🍽️ Cena: ${selectedFood}\n✨ Dopocena: ${selectedActivity}\n🚗 Passo a prenderti: Sì!\n\nCi vediamo presto! 🥰`;
+      const waUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
+      document.getElementById('wa-link').href = waUrl;
+
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 90, spread: 70, origin: { y: 0.65 } });
+      }
+
+      nextStep(6);
+    }
+
+    function downloadCalendarFile() {
+      const rawDate = document.getElementById('date-input').value;
+      const timeVal = document.getElementById('time-input').value;
+
+      const [hours, minutes] = timeVal.split(':');
+      const startDateTime = new Date(`${rawDate}T${hours || '20'}:${minutes || '00'}:00`);
+      const endDateTime = new Date(startDateTime.getTime() + (2.5 * 60 * 60 * 1000));
+
+      const formatICS = (dt) => dt.toISOString().replace(/-|:|\.\d+/g, '');
+
+      const icsContent = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "BEGIN:VEVENT",
+        `SUMMARY:Appuntamento Speciale ✨ (${selectedFood})`,
+        `DESCRIPTION:Programma:\\n- Cena: ${selectedFood}\\n- Dopocena: ${selectedActivity}\\n- Orario: ${timeVal}`,
+        `DTSTART:${formatICS(startDateTime)}`,
+        `DTEND:${formatICS(endDateTime)}`,
+        "STATUS:CONFIRMED",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', 'appuntamento.ics');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
